@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+*.mdb
+*.accdb
+omr_debug/
+.venv/
+venv/
+env/
+.env

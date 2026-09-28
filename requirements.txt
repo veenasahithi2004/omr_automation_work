@@ -1,0 +1,7 @@
+opencv-python>=4.5
+numpy
+Pillow
+pyodbc          # talks to Microsoft Access (.mdb)
+msaccessdb      # creates a blank .mdb file (works on any OS)
+torch>=2.14         # local neural-network inference for handwriting OCR
+transformers>=4.45,<5  # Microsoft TrOCR handwritten-text model
