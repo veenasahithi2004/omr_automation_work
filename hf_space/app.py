@@ -165,7 +165,8 @@ def admin_snapshot(request: gr.Request):
         limit = int(_setting(conn, "max_users", "5"))
         rows = _sql(conn, "SELECT username,role,active,created_at FROM omr_users ORDER BY role DESC,username").fetchall()
     values = [[r["username"], r["role"], "Active" if r["active"] else "Disabled"] for r in rows]
-    return gr.update(visible=True), limit, values, f"{sum(r['active'] for r in rows)} of {limit} user accounts enabled."
+    user_count = sum(bool(r["active"]) and r["role"] == "user" for r in rows)
+    return gr.update(visible=True), limit, values, f"{user_count} of {limit} user accounts enabled (admin account is separate)."
 
 
 def save_limit(new_limit, request: gr.Request):
@@ -179,7 +180,7 @@ def save_limit(new_limit, request: gr.Request):
         _tab, old_limit, rows, note = admin_snapshot(request)
         return "Enter a whole number from 1 to 1000.", old_limit, rows, note
     with _db_lock, _db() as conn:
-        active_count = _sql(conn, "SELECT COUNT(*) AS n FROM omr_users WHERE active=1").fetchone()["n"]
+        active_count = _sql(conn, "SELECT COUNT(*) AS n FROM omr_users WHERE active=1 AND role='user'").fetchone()["n"]
         if limit < active_count:
             _tab, old_limit, rows, note = admin_snapshot(request)
             return f"Disable accounts first; {active_count} accounts are currently active.", old_limit, rows, note
@@ -200,7 +201,7 @@ def add_user(username, password, request: gr.Request):
         return "Set a unique password with at least 12 characters.", limit, rows, note
     with _db_lock, _db() as conn:
         limit = int(_setting(conn, "max_users", "5"))
-        count = _sql(conn, "SELECT COUNT(*) AS n FROM omr_users WHERE active=1").fetchone()["n"]
+        count = _sql(conn, "SELECT COUNT(*) AS n FROM omr_users WHERE active=1 AND role='user'").fetchone()["n"]
         exists = _sql(conn, "SELECT username FROM omr_users WHERE username=?", (username,)).fetchone()
         if exists:
             message = "That username already exists."
@@ -447,7 +448,7 @@ def build_app():
         with gr.Tab("Admin", visible=False) as admin_tab:
             gr.Markdown("## User access\nAccounts use usernames and passwords only; no email addresses are collected. Passwords are stored as salted scrypt hashes.")
             with gr.Row():
-                limit_input = gr.Number(label="Maximum active user accounts", precision=0, minimum=1, maximum=1000)
+                limit_input = gr.Number(label="Maximum active user accounts (admin excluded)", precision=0, minimum=1, maximum=1000)
                 save_limit_button = gr.Button("Save user limit")
             limit_status = gr.Markdown()
             users_table = gr.Dataframe(headers=["Username", "Role", "Status"], interactive=False, label="Accounts")

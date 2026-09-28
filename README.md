@@ -59,7 +59,7 @@ Un-ticked "Review" = results go into the MDB automatically when the scan finishe
 
 The `hf_space/app.py` web front end runs the recognition engine in a browser-hosted Gradio Space. It accepts a saved JSON template plus its reference image, then multiple JPGs or a root folder upload. Results appear in an editable table and can be downloaded as CSV. Online scanning uses temporary uploads; it does not write scans to the desktop MDB.
 
-The hosted login uses usernames and passwords without email addresses. The initial admin account is `admin` unless `OMR_ADMIN_USERNAME` is set. Set `OMR_ADMIN_PASSWORD` as a private host secret before first launch; use a unique password with at least 12 characters. Admins can create/disable accounts and set the maximum active account count. Passwords are stored as salted scrypt hashes.
+The hosted login uses usernames and passwords without email addresses. The initial admin account is `admin` unless `OMR_ADMIN_USERNAME` is set. Set `OMR_ADMIN_PASSWORD` as a private host secret before first launch; use a unique password with at least 12 characters. Admins can create/disable accounts and set the maximum active user-account count (the admin is excluded). Passwords are stored as salted scrypt hashes.
 
 For hosted use, configure a persistent database by setting the private `DATABASE_URL` secret to a PostgreSQL connection URL. Without it, the app uses temporary local SQLite; accounts and the user limit can be lost when a free Space restarts. Keep scan JPGs out of the public source repository.
 
