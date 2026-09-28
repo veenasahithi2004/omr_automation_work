@@ -1,3 +1,15 @@
+---
+title: OMR Reader
+emoji: 📋
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+app_file: hf_space/app.py
+python_version: "3.12"
+models:
+  - microsoft/trocr-base-handwritten
+---
+
 # OMR Reader — any layout → Microsoft Access (.mdb)
 
 ```
@@ -42,6 +54,23 @@ Handwritten fields use Microsoft's TrOCR handwriting model locally. Install the 
 **Tab 2 – Scan**: load a template, click **Insert one JPG** for a single sheet, **Insert many JPGs** to multi-select a batch, or **Insert root folder** to add every JPG/JPEG from that folder and all nested subfolders. Choose the .mdb path, then click *START SCAN*. PDF and other image formats are not accepted. Re-selecting an already-added file does not add a duplicate.
 Review is on by default. After scanning, select a row and click **Edit selected results** (or double-click the row) to correct identification values and any question's answer before saving. **CHECK** means a configured required hall-ticket, class, admission-number, part-subject, or center-code field is blank. SCS number is optional. **BLANK** means no answers were marked in any answer part; **OK** means at least one answer was marked and no required field is missing. Other recognition warnings remain visible in the Warnings column but do not independently change the status. CSV exports include the full source JPG path for each row. The app plays a bell and shows a completion popup when the full batch has finished scanning.
 Un-ticked "Review" = results go into the MDB automatically when the scan finishes.
+
+## Browser-hosted preview (free tier)
+
+The `hf_space/app.py` web front end runs the recognition engine in a browser-hosted Gradio Space. It accepts a saved JSON template plus its reference image, then multiple JPGs or a root folder upload. Results appear in an editable table and can be downloaded as CSV. Online scanning uses temporary uploads; it does not write scans to the desktop MDB.
+
+The hosted login uses usernames and passwords without email addresses. The initial admin account is `admin` unless `OMR_ADMIN_USERNAME` is set. Set `OMR_ADMIN_PASSWORD` as a private host secret before first launch; use a unique password with at least 12 characters. Admins can create/disable accounts and set the maximum active account count. Passwords are stored as salted scrypt hashes.
+
+For hosted use, configure a persistent database by setting the private `DATABASE_URL` secret to a PostgreSQL connection URL. Without it, the app uses temporary local SQLite; accounts and the user limit can be lost when a free Space restarts. Keep scan JPGs out of the public source repository.
+
+To host free on Hugging Face, create a public Gradio Space from this repository, select ZeroGPU hardware in the Space settings, then set the secrets above. The host account must be in good standing, verified, and at least 30 days old to host free ZeroGPU; this does not require app users to provide emails. Free ZeroGPU has daily inference quotas (5 minutes/day for logged-in Hugging Face users; lower for visitors not signed into Hugging Face), and free Spaces sleep when idle. A separate free PostgreSQL account is needed for persistent user settings. The code in this public Space is visible to everyone, even though the app itself requires a username and password.
+
+Local preview (after `pip install -r requirements.txt`):
+
+```powershell
+$env:OMR_ADMIN_PASSWORD = "replace-with-a-unique-12-character-secret"
+python hf_space/app.py
+```
 
 ## What lands in the MDB
 | Table | Content |

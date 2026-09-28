@@ -2,6 +2,10 @@ __pycache__/
 *.py[cod]
 *.mdb
 *.accdb
+*.db
+*.sqlite
+*.sqlite3
+*.csv
 omr_debug/
 .venv/
 venv/

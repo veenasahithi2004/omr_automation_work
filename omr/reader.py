@@ -58,6 +58,8 @@ def _load_handwriting_model():
         model = VisionEncoderDecoderModel.from_pretrained(model_id)
     except Exception as e:
         raise RuntimeError(f"Could not load the local handwriting model {model_id}: {e}") from e
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model.to(device)
     model.eval()
     return torch, processor, model
 
@@ -93,7 +95,8 @@ def read_handwriting(image_bgr, f) -> HandwritingReading:
     # TrOCR expects dark text on a light background.
     page = cv2.bitwise_not(page)
     rgb = cv2.cvtColor(page, cv2.COLOR_GRAY2RGB)
-    pixel_values = processor(images=Image.fromarray(rgb), return_tensors="pt").pixel_values
+    device = next(model.parameters()).device
+    pixel_values = processor(images=Image.fromarray(rgb), return_tensors="pt").pixel_values.to(device)
     with torch.inference_mode():
         out = model.generate(pixel_values, num_beams=4, max_new_tokens=max(32, min(256, f.count * 2)),
                              return_dict_in_generate=True, output_scores=True)

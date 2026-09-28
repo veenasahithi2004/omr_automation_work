@@ -5,3 +5,6 @@ pyodbc          # talks to Microsoft Access (.mdb)
 msaccessdb      # creates a blank .mdb file (works on any OS)
 torch>=2.14         # local neural-network inference for handwriting OCR
 transformers>=4.45,<5  # Microsoft TrOCR handwritten-text model
+gradio>=5.0
+spaces>=0.40
+psycopg[binary]>=3.2  # optional persistent PostgreSQL account store for hosted deployments
